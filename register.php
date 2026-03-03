@@ -1,6 +1,5 @@
 <?php
-$title = "Inscription";
-require_once __DIR__ . '/includes/header.php';
+require_once __DIR__ . '/includes/layout.php';
 require_once __DIR__ . '/includes/db.php';
 
 $errors = [];
@@ -18,7 +17,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!$errors) {
         $pdo = db();
-
         $st = $pdo->prepare("SELECT id FROM users WHERE username = ? OR email = ?");
         $st->execute([$username, $email]);
         if ($st->fetch()) {
@@ -33,41 +31,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+
+site_header('Inscription');
 ?>
 
-<div class="card">
+<section class="card card--small">
   <h1>Inscription</h1>
 
   <?php foreach ($errors as $e): ?>
-    <div class="flash flash--error"><?= htmlspecialchars($e) ?></div>
+    <div class="alert alert--danger"><?= htmlspecialchars($e) ?></div>
   <?php endforeach; ?>
 
-  <form class="form" method="post">
-    <div>
-      <label>Username</label>
-      <input name="username" value="<?= htmlspecialchars($username) ?>" autocomplete="username">
-    </div>
+  <form method="post" class="form">
+    <label>Username</label>
+    <input name="username" value="<?= htmlspecialchars($username) ?>" required>
 
-    <div>
-      <label>Email</label>
-      <input name="email" value="<?= htmlspecialchars($email) ?>" autocomplete="email">
-    </div>
+    <label>Email</label>
+    <input name="email" value="<?= htmlspecialchars($email) ?>" required>
 
-    <div>
-      <label>Mot de passe</label>
-      <input type="password" name="password" autocomplete="new-password">
-    </div>
+    <label>Mot de passe</label>
+    <input type="password" name="password" required>
 
-    <div>
-      <label>Confirmer</label>
-      <input type="password" name="password2" autocomplete="new-password">
-    </div>
+    <label>Confirmer</label>
+    <input type="password" name="password2" required>
 
     <button class="btn" type="submit">Créer le compte</button>
   </form>
 
-  <hr>
-  <p class="muted"><a href="/lol-portal/login.php">Déjà un compte ? Connexion</a></p>
-</div>
+  <p class="muted">Déjà un compte ? <a href="/lol-portal/login.php">Connexion</a></p>
+</section>
 
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+<?php site_footer(); ?>

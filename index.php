@@ -1,24 +1,30 @@
 <?php
-$title = "Accueil";
-require_once __DIR__ . '/includes/header.php';
+require_once __DIR__ . '/includes/layout.php';
+
+$user = current_user();
+site_header('Accueil');
 ?>
 
-<div class="card">
+<section class="card">
   <h1>LoL Portal</h1>
 
   <?php if ($user): ?>
-    <div class="flash">
+    <div class="alert">
       Connecté en tant que <strong><?= htmlspecialchars($user['username']) ?></strong>
       (<?= htmlspecialchars($user['role']) ?>)
     </div>
   <?php else: ?>
-    <div class="flash">
-      Bienvenue ! Connecte-toi pour accéder aux fonctionnalités.
-    </div>
+    <p>Bienvenue ! Connecte-toi ou crée un compte.</p>
   <?php endif; ?>
 
-  <hr>
   <p class="muted">Objectif : auth + rôles + CRUD jeux + succès.</p>
-</div>
 
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+  <div class="actions">
+    <a class="btn" href="/lol-portal/games.php">Voir les jeux</a>
+    <?php if (!$user): ?>
+      <a class="btn btn--ghost" href="/lol-portal/login.php">Connexion</a>
+    <?php endif; ?>
+  </div>
+</section>
+
+<?php site_footer(); ?>

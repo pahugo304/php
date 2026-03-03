@@ -1,6 +1,5 @@
 <?php
-$title = "Connexion";
-require_once __DIR__ . '/includes/header.php';
+require_once __DIR__ . '/includes/layout.php';
 require_once __DIR__ . '/includes/db.php';
 
 $errors = [];
@@ -12,46 +11,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pdo = db();
     $st = $pdo->prepare("SELECT id, username, email, password_hash, role FROM users WHERE username = ? OR email = ?");
     $st->execute([$login, $login]);
-    $u = $st->fetch();
+    $user = $st->fetch();
 
-    if (!$u || !password_verify($password, $u['password_hash'])) {
+    if (!$user || !password_verify($password, $user['password_hash'])) {
         $errors[] = "Identifiants invalides.";
     } else {
         $_SESSION['user'] = [
-            'id' => (int)$u['id'],
-            'username' => $u['username'],
-            'email' => $u['email'],
-            'role' => $u['role'],
+            'id' => (int)$user['id'],
+            'username' => $user['username'],
+            'email' => $user['email'],
+            'role' => $user['role'],
         ];
         header('Location: /lol-portal/index.php');
         exit;
     }
 }
+
+site_header('Connexion');
 ?>
 
-<div class="card">
+<section class="card card--small">
   <h1>Connexion</h1>
 
   <?php foreach ($errors as $e): ?>
-    <div class="flash flash--error"><?= htmlspecialchars($e) ?></div>
+    <div class="alert alert--danger"><?= htmlspecialchars($e) ?></div>
   <?php endforeach; ?>
 
-  <form class="form" method="post">
-    <div>
-      <label>Username ou Email</label>
-      <input name="login" value="<?= htmlspecialchars($login) ?>" autocomplete="username">
-    </div>
+  <form method="post" class="form">
+    <label>Username ou Email</label>
+    <input name="login" value="<?= htmlspecialchars($login) ?>" required>
 
-    <div>
-      <label>Mot de passe</label>
-      <input type="password" name="password" autocomplete="current-password">
-    </div>
+    <label>Mot de passe</label>
+    <input type="password" name="password" required>
 
     <button class="btn" type="submit">Se connecter</button>
   </form>
 
-  <hr>
-  <p class="muted"><a href="/lol-portal/register.php">Créer un compte</a></p>
-</div>
+  <p class="muted">Pas de compte ? <a href="/lol-portal/register.php">Créer un compte</a></p>
+</section>
 
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+<?php site_footer(); ?>
