@@ -1,6 +1,5 @@
 <?php
-$title = "Admin - Utilisateurs";
-require_once __DIR__ . '/../includes/header.php';
+require_once __DIR__ . '/../includes/layout.php';
 require_once __DIR__ . '/../includes/db.php';
 
 require_admin();
@@ -8,7 +7,7 @@ require_admin();
 $pdo = db();
 $me = current_user();
 
-// Actions POST (CSRF)
+// CSRF check + action handling
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check($_POST['csrf'] ?? null);
 
@@ -37,60 +36,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $users = $pdo->query("SELECT id, username, email, role, created_at FROM users ORDER BY created_at DESC")->fetchAll();
 $err = $_GET['err'] ?? '';
+
+site_header('Admin - Utilisateurs');
 ?>
 
-<div class="card">
-  <h1>Gestion des utilisateurs</h1>
-  <p class="muted"><a href="/lol-portal/admin/dashboard.php">← Dashboard</a></p>
+<section class="card">
+  <div class="row row--between">
+    <h1>Gestion des utilisateurs</h1>
+    <a class="btn btn--ghost" href="/lol-portal/admin/dashboard.php">← Dashboard</a>
+  </div>
 
   <?php if ($err === 'self'): ?>
-    <div class="flash flash--error">Action refusée : tu ne peux pas modifier ton propre compte.</div>
+    <div class="alert alert--danger">Action refusée : tu ne peux pas modifier ton propre compte.</div>
   <?php endif; ?>
 
-  <table class="table">
-    <thead>
-      <tr>
-        <th>ID</th><th>Username</th><th>Email</th><th>Rôle</th><th>Créé le</th><th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <?php foreach ($users as $u): ?>
+  <div class="tableWrap">
+    <table class="table">
+      <thead>
         <tr>
-          <td><?= (int)$u['id'] ?></td>
-          <td><?= htmlspecialchars($u['username']) ?></td>
-          <td><?= htmlspecialchars($u['email']) ?></td>
-          <td><?= htmlspecialchars($u['role']) ?></td>
-          <td><?= htmlspecialchars($u['created_at']) ?></td>
-          <td>
-            <?php if ((int)$u['id'] === (int)$me['id']): ?>
-              <span class="muted">(toi)</span>
-            <?php else: ?>
-              <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                <form method="post">
+          <th>ID</th><th>Username</th><th>Email</th><th>Rôle</th><th>Créé le</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php foreach ($users as $u): ?>
+          <tr>
+            <td><?= (int)$u['id'] ?></td>
+            <td><?= htmlspecialchars($u['username']) ?></td>
+            <td><?= htmlspecialchars($u['email']) ?></td>
+            <td><span class="pill"><?= htmlspecialchars($u['role']) ?></span></td>
+            <td><?= htmlspecialchars($u['created_at']) ?></td>
+            <td>
+              <?php if ((int)$u['id'] === (int)$me['id']): ?>
+                <span class="muted">(toi)</span>
+              <?php else: ?>
+                <form method="post" class="inline">
                   <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
                   <input type="hidden" name="id" value="<?= (int)$u['id'] ?>">
                   <?php if ($u['role'] !== 'admin'): ?>
                     <input type="hidden" name="action" value="promote">
-                    <button class="btn" type="submit">Promote admin</button>
+                    <button class="btn btn--small" type="submit">Promote admin</button>
                   <?php else: ?>
                     <input type="hidden" name="action" value="demote">
-                    <button class="btn" type="submit">Demote user</button>
+                    <button class="btn btn--small" type="submit">Demote user</button>
                   <?php endif; ?>
                 </form>
 
-                <form method="post" onsubmit="return confirm('Supprimer cet utilisateur ?');">
+                <form method="post" class="inline" onsubmit="return confirm('Supprimer cet utilisateur ?');">
                   <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
                   <input type="hidden" name="id" value="<?= (int)$u['id'] ?>">
                   <input type="hidden" name="action" value="delete">
-                  <button class="btn btn--ghost" type="submit">Supprimer</button>
+                  <button class="btn btn--small btn--danger" type="submit">Supprimer</button>
                 </form>
-              </div>
-            <?php endif; ?>
-          </td>
-        </tr>
-      <?php endforeach; ?>
-    </tbody>
-  </table>
-</div>
+              <?php endif; ?>
+            </td>
+          </tr>
+        <?php endforeach; ?>
+      </tbody>
+    </table>
+  </div>
+</section>
 
-<?php require_once __DIR__ . '/../includes/footer.php'; ?>
+<?php site_footer(); ?>

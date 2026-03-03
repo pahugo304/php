@@ -1,93 +1,149 @@
 <?php
-$title = "Admin - Jeux";
-require_once __DIR__ . '/../includes/header.php';
+declare(strict_types=1);
+
+require_once __DIR__ . '/../includes/layout.php';
 require_once __DIR__ . '/../includes/db.php';
 
 require_admin();
 $pdo = db();
 
+$mode = $_GET['mode'] ?? 'list'; // list | create | edit
+$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+
 $errors = [];
-$name = trim($_POST['name'] ?? '');
+$name = $_POST['name'] ?? '';
+$type = $_POST['type'] ?? '';
+$description = $_POST['description'] ?? '';
+$image_url = $_POST['image_url'] ?? '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check($_POST['csrf'] ?? null);
     $action = $_POST['action'] ?? '';
 
-    if ($action === 'create') {
-        if ($name === '' || strlen($name) < 2) {
-            $errors[] = "Nom du jeu invalide (min 2 caractères).";
-        } else {
-            $st = $pdo->prepare("INSERT INTO games (name) VALUES (?)");
-            $st->execute([$name]);
-            header('Location: /lol-portal/admin/games.php');
-            exit;
-        }
+    if ($action === 'delete') {
+        $gid = (int)($_POST['id'] ?? 0);
+        // delete achievements first (FK safe)
+        $st = $pdo->prepare("DELETE FROM achievements WHERE game_id=?");
+        $st->execute([$gid]);
+
+        $st = $pdo->prepare("DELETE FROM games WHERE id=?");
+        $st->execute([$gid]);
+
+        header('Location: /lol-portal/admin/games.php');
+        exit;
     }
 
-    if ($action === 'delete') {
-        $id = (int)($_POST['id'] ?? 0);
+    // create / update
+    if (trim($name) === '' || strlen($name) < 2) $errors[] = "Nom invalide.";
+    if (trim($type) === '' || strlen($type) < 2) $errors[] = "Type invalide.";
+    if (trim($description) === '' || strlen($description) < 10) $errors[] = "Description min 10 caractères.";
 
-        // si achievements dépend de game_id, il faut supprimer d'abord les achievements
-        $pdo->prepare("DELETE FROM achievements WHERE game_id=?")->execute([$id]);
-        $pdo->prepare("DELETE FROM games WHERE id=?")->execute([$id]);
-
+    if (!$errors) {
+        if ($action === 'create') {
+            $st = $pdo->prepare("INSERT INTO games (name, type, description, image_url) VALUES (?, ?, ?, ?)");
+            $st->execute([$name, $type, $description, $image_url]);
+        } elseif ($action === 'update') {
+            $gid = (int)($_POST['id'] ?? 0);
+            $st = $pdo->prepare("UPDATE games SET name=?, type=?, description=?, image_url=? WHERE id=?");
+            $st->execute([$name, $type, $description, $image_url, $gid]);
+        }
         header('Location: /lol-portal/admin/games.php');
         exit;
     }
 }
 
-$games = $pdo->query("SELECT id, name FROM games ORDER BY id DESC")->fetchAll();
+$editing = null;
+if ($mode === 'edit' && $id > 0) {
+    $st = $pdo->prepare("SELECT * FROM games WHERE id=?");
+    $st->execute([$id]);
+    $editing = $st->fetch();
+    if ($editing) {
+        $name = $name ?: $editing['name'];
+        $type = $type ?: $editing['type'];
+        $description = $description ?: $editing['description'];
+        $image_url = $image_url ?: ($editing['image_url'] ?? '');
+    }
+}
+
+$games = $pdo->query("SELECT id, name, type, created_at FROM games ORDER BY created_at DESC")->fetchAll();
+
+site_header('Admin - Jeux');
 ?>
 
-<div class="card">
-  <h1>Gestion des jeux</h1>
-  <p class="muted"><a href="/lol-portal/admin/dashboard.php">← Dashboard</a></p>
+<section class="card">
+  <div class="row row--between">
+    <h1>Gestion des jeux</h1>
+    <div class="row">
+      <a class="btn btn--ghost" href="/lol-portal/admin/dashboard.php">← Dashboard</a>
+      <a class="btn" href="/lol-portal/admin/games.php?mode=create">+ Nouveau jeu</a>
+    </div>
+  </div>
 
   <?php foreach ($errors as $e): ?>
-    <div class="flash flash--error"><?= htmlspecialchars($e) ?></div>
+    <div class="alert alert--danger"><?= htmlspecialchars($e) ?></div>
   <?php endforeach; ?>
 
-  <h2>Ajouter un jeu</h2>
-  <form class="form" method="post">
-    <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
-    <input type="hidden" name="action" value="create">
+  <?php if ($mode === 'create' || ($mode === 'edit' && $editing)): ?>
+    <div class="card card--inner">
+      <h2><?= $mode === 'create' ? 'Créer un jeu' : 'Modifier le jeu' ?></h2>
+      <form method="post" class="form">
+        <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
+        <input type="hidden" name="action" value="<?= $mode === 'create' ? 'create' : 'update' ?>">
+        <?php if ($mode === 'edit'): ?>
+          <input type="hidden" name="id" value="<?= (int)$editing['id'] ?>">
+        <?php endif; ?>
 
-    <div>
-      <label>Nom</label>
-      <input name="name" value="<?= htmlspecialchars($name) ?>" placeholder="Ex: Sekiro">
+        <label>Nom</label>
+        <input name="name" value="<?= htmlspecialchars($name) ?>" required>
+
+        <label>Type</label>
+        <input name="type" value="<?= htmlspecialchars($type) ?>" required>
+
+        <label>Description</label>
+        <textarea name="description" rows="4" required><?= htmlspecialchars($description) ?></textarea>
+
+        <label>Image URL (optionnel)</label>
+        <input name="image_url" value="<?= htmlspecialchars($image_url) ?>">
+
+        <div class="row">
+          <button class="btn" type="submit">Enregistrer</button>
+          <a class="btn btn--ghost" href="/lol-portal/admin/games.php">Annuler</a>
+        </div>
+      </form>
     </div>
+  <?php endif; ?>
 
-    <button class="btn" type="submit">Ajouter</button>
-  </form>
-
-  <hr>
-
-  <h2>Liste des jeux</h2>
-  <table class="table">
-    <thead>
+  <div class="tableWrap">
+    <table class="table">
+      <thead>
       <tr>
-        <th>ID</th>
-        <th>Nom</th>
-        <th>Actions</th>
+        <th>ID</th><th>Nom</th><th>Type</th><th>Créé le</th><th>Actions</th>
       </tr>
-    </thead>
-    <tbody>
+      </thead>
+      <tbody>
       <?php foreach ($games as $g): ?>
         <tr>
           <td><?= (int)$g['id'] ?></td>
           <td><?= htmlspecialchars($g['name']) ?></td>
+          <td><span class="badge"><?= htmlspecialchars($g['type']) ?></span></td>
+          <td><?= htmlspecialchars($g['created_at']) ?></td>
           <td>
-            <form method="post" onsubmit="return confirm('Supprimer ce jeu ? (supprime aussi ses succès)');">
+            <a class="btn btn--small" href="/lol-portal/admin/games.php?mode=edit&id=<?= (int)$g['id'] ?>">Edit</a>
+
+            <form method="post" class="inline" onsubmit="return confirm('Supprimer ce jeu ? (supprime aussi ses succès)');">
               <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
               <input type="hidden" name="action" value="delete">
               <input type="hidden" name="id" value="<?= (int)$g['id'] ?>">
-              <button class="btn btn--ghost" type="submit">Supprimer</button>
+              <button class="btn btn--small btn--danger" type="submit">Delete</button>
             </form>
+
+            <a class="btn btn--small btn--ghost" href="/lol-portal/games.php?id=<?= (int)$g['id'] ?>">Voir</a>
           </td>
         </tr>
       <?php endforeach; ?>
-    </tbody>
-  </table>
-</div>
+      </tbody>
+    </table>
+  </div>
+</section>
 
-<?php require_once __DIR__ . '/../includes/footer.php'; ?>
+<?php site_footer(); ?>

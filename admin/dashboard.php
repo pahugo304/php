@@ -1,27 +1,23 @@
 <?php
-$title = "Admin Dashboard";
-require_once __DIR__ . '/../includes/header.php';
+require_once __DIR__ . '/../includes/layout.php';
 
 require_admin();
+$user = current_user();
+
+site_header('Admin - Dashboard');
 ?>
 
-<div class="card">
+<section class="card">
   <h1>Admin Dashboard</h1>
-  <p class="muted">
-    Connecté : <strong><?= htmlspecialchars($user['username']) ?></strong>
-    (<?= htmlspecialchars($user['role']) ?>)
-  </p>
+  <div class="alert">Connecté : <strong><?= htmlspecialchars($user['username']) ?></strong> (<?= htmlspecialchars($user['role']) ?>)</div>
 
-  <hr>
-
-  <div style="display:flex; gap:12px; flex-wrap:wrap;">
-    <a class="btn" href="/lol-portal/admin/users.php">Gérer les utilisateurs</a>
-    <a class="btn" href="/lol-portal/admin/games.php">Gérer les jeux</a>
-    <a class="btn" href="/lol-portal/admin/achievements.php">Gérer les succès</a>
+  <div class="grid">
+    <a class="tile tile--link" href="/lol-portal/admin/users.php"><strong>Gérer les utilisateurs</strong><p class="muted">Promote/Demote/Delete</p></a>
+    <a class="tile tile--link" href="/lol-portal/admin/games.php"><strong>Gérer les jeux</strong><p class="muted">CRUD Games</p></a>
+    <a class="tile tile--link" href="/lol-portal/admin/achievements.php"><strong>Gérer les succès</strong><p class="muted">CRUD Achievements</p></a>
   </div>
 
-  <hr>
-  <a class="btn btn--ghost" href="/lol-portal/index.php">Retour site</a>
-</div>
+  <p class="muted"><a href="/lol-portal/index.php">Retour site</a></p>
+</section>
 
-<?php require_once __DIR__ . '/../includes/footer.php'; ?>
+<?php site_footer(); ?>
