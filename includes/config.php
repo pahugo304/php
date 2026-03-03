@@ -8,4 +8,6 @@ const DB_PASS = 'ChangeMe_StrongPassword!';
 
 ini_set('session.use_strict_mode', '1');
 ini_set('session.cookie_httponly', '1');
+
 session_name('LOLSESSID');
+session_start();
