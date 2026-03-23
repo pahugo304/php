@@ -12,7 +12,7 @@ INSERT INTO games (name, type, description, image_url) VALUES
  'BR rapide en squads, mobilité, armes, legends et rotation sur la zone.',
  'https://upload.wikimedia.org/wikipedia/commons/d/db/Apex_legends_logo.svg'),
 ('Elden Ring', 'Action RPG',
- 'Exploration, boss, builds et progression dans un monde ouvert dark-fantasy (souls-like).',
+ 'Exploration, boss, builds et progression dans un monde ouvert dark-fantasy.',
  'https://upload.wikimedia.org/wikipedia/commons/6/6b/Elden_Ring_logo.svg');
 
 -- Achievements (3 per game)
@@ -80,3 +80,9 @@ FROM games WHERE name='Elden Ring';
 INSERT INTO achievements (game_id, title, description, points)
 SELECT id, 'No Hit (presque)', 'Vaincre un boss en prenant très peu de dégâts (challenge perso).', 25
 FROM games WHERE name='Elden Ring';
+
+UPDATE games SET difficulty='Hard' WHERE name='Sekiro: Shadows Die Twice';
+UPDATE games SET difficulty='Medium' WHERE name='Overwatch 2';
+UPDATE games SET difficulty='Easy' WHERE name='Marvel Rivals';
+UPDATE games SET difficulty='Medium' WHERE name='Apex Legends';
+UPDATE games SET difficulty='Hard' WHERE name='Elden Ring';

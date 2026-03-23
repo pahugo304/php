@@ -24,3 +24,15 @@ CREATE TABLE achievements (
   points INT NOT NULL DEFAULT 10,
   FOREIGN KEY (game_id) REFERENCES games(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
+
+CREATE TABLE user_games (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  game_id INT NOT NULL,
+  is_favorite TINYINT(1) NOT NULL DEFAULT 0,
+  play_time_hours INT NOT NULL DEFAULT 0,
+  added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (game_id) REFERENCES games(id) ON DELETE CASCADE,
+  UNIQUE KEY unique_user_game (user_id, game_id)
+) ENGINE=InnoDB;
