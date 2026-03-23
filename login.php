@@ -16,6 +16,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$user || !password_verify($password, $user['password_hash'])) {
         $errors[] = "Identifiants invalides.";
     } else {
+        session_regenerate_id(true);
+
         $_SESSION['user'] = [
             'id' => (int)$user['id'],
             'username' => $user['username'],

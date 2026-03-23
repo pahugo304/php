@@ -6,6 +6,7 @@ require_once __DIR__ . '/includes/db.php';
 require_once __DIR__ . '/includes/auth.php';
 
 require_login();
+csrf_check($_POST['csrf'] ?? null);
 
 $pdo = db();
 $user = current_user();

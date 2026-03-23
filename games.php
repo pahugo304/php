@@ -76,11 +76,13 @@ if ($id > 0) {
             <div class="row" style="gap:8px; margin-top:12px;">
               <?php if (!$isAdded): ?>
                 <form method="post" action="/lol-portal/add_game.php" class="inline">
+                  <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
                   <input type="hidden" name="game_id" value="<?= (int)$game['id'] ?>">
                   <button class="btn btn--small" type="submit">Ajouter à mon profil</button>
                 </form>
               <?php else: ?>
                 <form method="post" action="/lol-portal/toggle_favorite.php" class="inline">
+                  <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
                   <input type="hidden" name="game_id" value="<?= (int)$game['id'] ?>">
                   <button class="btn btn--small" type="submit">
                     <?= $isFavorite ? 'Retirer favori' : 'Mettre en favori' ?>
@@ -88,6 +90,7 @@ if ($id > 0) {
                 </form>
 
                 <form method="post" action="/lol-portal/remove_game.php" class="inline" onsubmit="return confirm('Retirer ce jeu de ton profil ?');">
+                  <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
                   <input type="hidden" name="game_id" value="<?= (int)$game['id'] ?>">
                   <button class="btn btn--small btn--danger" type="submit">Retirer du profil</button>
                 </form>
@@ -227,11 +230,13 @@ if ($user) {
 
               <?php if (!$isAdded): ?>
                 <form method="post" action="/lol-portal/add_game.php" class="inline">
+                  <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
                   <input type="hidden" name="game_id" value="<?= (int)$g['id'] ?>">
                   <button class="btn btn--small" type="submit">Ajouter</button>
                 </form>
               <?php else: ?>
                 <form method="post" action="/lol-portal/toggle_favorite.php" class="inline">
+                  <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
                   <input type="hidden" name="game_id" value="<?= (int)$g['id'] ?>">
                   <button class="btn btn--small" type="submit">
                     <?= $isFavorite ? 'Retirer favori' : 'Favori' ?>
@@ -239,6 +244,7 @@ if ($user) {
                 </form>
 
                 <form method="post" action="/lol-portal/remove_game.php" class="inline" onsubmit="return confirm('Retirer ce jeu de ton profil ?');">
+                  <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
                   <input type="hidden" name="game_id" value="<?= (int)$g['id'] ?>">
                   <button class="btn btn--small btn--danger" type="submit">Retirer</button>
                 </form>
