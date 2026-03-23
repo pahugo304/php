@@ -14,11 +14,15 @@ site_header('Accueil');
       (<?= htmlspecialchars($user['role']) ?>)
     </div>
   <?php else: ?>
-    <p>Bienvenue ! Connecte-toi ou crée un compte.</p>
+    <p>Connecte-toi ou crée un compte pour avoir accès aux fonctionnalités du site.</p>
   <?php endif; ?>
 
-  <p class="muted">Objectif : auth + rôles + CRUD jeux + succès.</p>
-
+  <p class="muted">Bienvenue sur LoL Portal !</p>
+<p class="muted" style="max-width:700px; line-height:1.7;">
+  LoL Portal est une plateforme de découverte et de gestion de jeux vidéo.
+  Les utilisateurs peuvent consulter les jeux disponibles, découvrir leurs succès
+  et accéder à leur profil personnel.
+</p>
   <div class="actions">
     <a class="btn" href="/lol-portal/games.php">Voir les jeux</a>
     <?php if (!$user): ?>

@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ?? '';
 
     $pdo = db();
-    $st = $pdo->prepare("SELECT id, username, email, password_hash, role FROM users WHERE username = ? OR email = ?");
+    $st = $pdo->prepare("SELECT id, username, email, password_hash, role, created_at FROM users WHERE username = ? OR email = ?");
     $st->execute([$login, $login]);
     $user = $st->fetch();
 
@@ -21,6 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'username' => $user['username'],
             'email' => $user['email'],
             'role' => $user['role'],
+            'created_at' => $user['created_at'],
         ];
         header('Location: /lol-portal/index.php');
         exit;
